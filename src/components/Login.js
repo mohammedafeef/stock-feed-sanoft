@@ -109,6 +109,9 @@ const Register = styled.p`
             border-bottom:1.5px solid rgba(0,0,0,.65);
         }
     }
+    @media screen and (max-width:600px){
+        font-size:1rem;
+    }
 
 
 `

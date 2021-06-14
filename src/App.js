@@ -1,4 +1,5 @@
 import '../node_modules/bootstrap/dist/css/bootstrap.min.css';
+import '../node_modules/bootstrap-icons/font/bootstrap-icons.css';
 import styled from 'styled-components';
 //importing the components
 import { 
@@ -18,7 +19,7 @@ function App() {
       <Route exact path="/" component={Login}/>
       <Route path="/login" component={Login}/>
       <Route path="/register" component={Register}/>
-      <Route path="/stocklist" component={StockList}/>
+      <Route path="/stock" component={StockList}/>
     </Switch>
     </FullScreen>
   );

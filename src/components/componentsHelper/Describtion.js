@@ -31,6 +31,9 @@ const Describe = styled.div`
         right:-7rem;
     }
     overflow:hidden;
+    @media screen and (max-width:800px){
+        display:none !important;
+    }
 `
 const Line = styled.div`
     width:20%;
