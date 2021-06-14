@@ -1,8 +1,10 @@
 import React, { useState } from 'react'
 import styled from 'styled-components';
-
+import {db} from '../../firebase';
+import { v1 as uuidv1 } from 'uuid';
 function AddStock({swithAddSec}) {
     const [item,setItem] = useState({
+        owner:localStorage.getItem('username'),
         name:'',
         stock:'',
         qty:'',
@@ -20,7 +22,10 @@ function AddStock({swithAddSec}) {
         // To prevent the default form action
         e.preventDefault();
         console.log(item);
+        db.collection('stocks').doc(uuidv1()).set(item);
+        swithAddSec();
         setItem({
+            owner:localStorage.getItem('username'),
             name:'',
             stock:'',
             qty:'',
@@ -87,7 +92,6 @@ function AddStock({swithAddSec}) {
 const Container = styled.div`
     width:80%;
     height:auto;
-    ${'' /* overflow:hidden; */}
     background-color:white;
     max-width:580px;
 `
@@ -135,7 +139,7 @@ const AddForm = styled.form`
                 outline:none;
             }
             :focus{
-                outline:none;
+                box-shadow:none;
             }
         }
     }

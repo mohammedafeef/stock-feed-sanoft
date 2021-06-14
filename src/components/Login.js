@@ -1,12 +1,16 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import Describtion from './componentsHelper/Describtion';
-import {Link} from 'react-router-dom';
+import {Link, Redirect, useHistory} from 'react-router-dom';
+import {db} from '../firebase';
 function Login() {
     const [user,setUser] = useState({
         username:'',
         password:''
     });
+    const history = useHistory();
+    const [invalidErr,setInvalidErr] = useState(false);
+    const [invalidPass,setInvalidPass] = useState(false);
     const updateUser = (e) =>{
         setUser((old)=>{
             return{
@@ -15,17 +19,44 @@ function Login() {
             }
         });
     }
-    const authUser = (e) =>{
-        e.preventDefault()
-        console.log('authenticating the user')
-        console.log(user);
+    const authUser = async (e) =>{
+        try{
+            e.preventDefault();
+            const getUser = await db.collection('users').doc(user.username).get();
+            if(getUser.exists){
+                if(getUser.data().password === user.password){
+                    localStorage.setItem('username',user.username);
+                    localStorage.setItem('logedIn','true');
+                    history.push('/stock');
+                }else{
+                    setInvalidPass(true);
+                }
+
+            }else{
+                setInvalidErr(true);
+            }
+            console.log('authenticating the user')
+            console.log(user);
+            setUser({
+                username:'',
+                password:''
+            })
+
+        }catch(err){
+            console.log(err);
+        }
+
     }
     return (
         <div className=" w-100 h-100 row p-0 m-0" >
             <Describtion/>
             <LoginSection className="col-md-6 d-flex flex-column justify-content-center align-items-center" >
                 <Tittle className="h1">sign in</Tittle>
-                <LoginPart onSubmit={authUser} className="form-group d-flex flex-column">
+                <LoginPart 
+                onSubmit={authUser}
+                errState={invalidErr} 
+                errPassState={invalidPass}
+                className="form-group d-flex flex-column">
                     <input 
                     type="text" 
                     name="username" 
@@ -41,7 +72,8 @@ function Login() {
                     value={user.password} 
                     onChange={updateUser} 
                     required="true"/>
-
+                    <p className="err">invalid username</p>
+                    <p className="passErr">invalid password</p>
                     <button type="submit" className="btn btn-primary">login</button>
                 </LoginPart>
                 <Register className="h5">Don't you have an accound ? <strong><Link to="/register" >Register Now</Link></strong></Register>
@@ -91,6 +123,14 @@ const LoginPart = styled.form`
         :focus-within{
             border-bottom:2px solid rgba(0,0,0,.5);
         }
+    }
+    .err{
+        color:red;
+        display:${props => (props.errState ? "flex":"none")};
+    }
+    .passErr{
+        color:red;
+        display:${props => (props.errPassState ? "flex":"none")};
     }
     button{
         margin:3rem 0 1rem;

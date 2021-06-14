@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import Describtion from './componentsHelper/Describtion';
-import {Link} from 'react-router-dom';
+import {Link, Redirect} from 'react-router-dom';
+import {db} from '../firebase';
 function Register() {
     const [user,setUser] = useState({
         username:'',
@@ -9,6 +10,7 @@ function Register() {
         email:'',
         password:''
     });
+    const [err,setErr] = useState(false);
     const updateUser = (e) =>{
         setUser((old)=>{
             return{
@@ -17,23 +19,34 @@ function Register() {
             }
         });
     }
-    const createUser = (e) =>{
-        e.preventDefault()
-        console.log('authenticating the user')
-        console.log(user);
-        setUser({
-            username:'',
-            name:'',
-            email:'',
-            password:''
-        });
+    const createUser = async (e) =>{
+        try{
+            e.preventDefault()
+            console.log('authenticating the user');
+            console.log(user);
+            const userData = await db.collection('users').doc(user.username).get()
+            if(userData.exists){
+                setErr(true);
+            }else{
+                db.collection('users').doc(user.username).set(user)
+            }
+            setUser({
+                username:'',
+                name:'',
+                email:'',
+                password:''
+            });
+            Redirect('/login');
+        }catch(err){
+            console.log(err);
+        }
     }
     return (
         <div className=" w-100 h-100 row p-0 m-0" >
             <Describtion/>
             <RegisterSection className="col-md-6 d-flex flex-column justify-content-center align-items-center" >
                 <Tittle className="h1">Register here</Tittle>
-                <RegisterPart onSubmit={createUser} className="form-group d-flex flex-column">
+                <RegisterPart onSubmit={createUser} className="form-group d-flex flex-column" state={err}>
                     <input 
                     type="text" 
                     name="name" 
@@ -65,6 +78,7 @@ function Register() {
                     value={user.password} 
                     onChange={updateUser} 
                     required="true"/>
+                    <p className="err">username already exists</p>
 
                     <button type="submit" className="btn btn-primary">Register</button>
                 </RegisterPart>
@@ -117,6 +131,10 @@ const RegisterPart = styled.form`
         :focus-within{
             border-bottom:2px solid rgba(0,0,0,.5);
         }
+    }
+    .err{
+        display:${props => (props.state ? "flex":"none")};
+        color:red;
     }
     button{
         margin:3rem 0 1rem;
