@@ -188,7 +188,8 @@ const AddForm = styled.form`
             margin:0;
         }
         .input-field{
-            margin-top:1.5rem;
+            margin-top:2rem;
+            margin-bottom:.8rem;
         }
     }
 

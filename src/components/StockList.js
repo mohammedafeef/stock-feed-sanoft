@@ -15,7 +15,7 @@ function StockList() {
             let tempStocks = [];
             // console.log(snapshot)
             tempStocks = snapshot.docs
-            .filter((doc)=> doc.data().owner == localStorage.getItem('username'));
+            .filter((doc)=> doc.data().owner === localStorage.getItem('username'));
             tempStocks = tempStocks
             .map((doc)=>{
                 return {
@@ -60,7 +60,7 @@ function StockList() {
                     <tbody>
                         {
                             stocks.map((stock)=>(
-                                <tr>
+                                <tr key={stock.id}>
                                     <th>{stock.name}</th>
                                     <th>{stock.qty}</th>
                                     <th>{stock.stock}</th>
@@ -92,9 +92,6 @@ const StockTable = styled.div`
     position:relative;
     .stockTable{
         padding:1rem 2rem;
-    }
-    @media screen and (max-width:600px){
-        padding:3rem 1rem 0;
     }
 `
 const StockHeader = styled.div`

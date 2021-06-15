@@ -15,25 +15,17 @@ import {
 function App() {
   return (
     <FullScreen>
-    {
-      !localStorage.getItem('logedIn')?(
         <Switch>
           <Route exact path="/" component={Login}/>
           <Route path="/login" component={Login}/>
           <Route path="/register" component={Register}/>
           <Route path="/stock" component={StockList}/>
+          {/* {
+            localStorage.getItem('logedIn')?(
+                <Route path="/stock" component={StockList}/>
+            ):(null)
+          } */}
         </Switch>
-      ):(
-        <Switch>
-          <Route path="/login" component={Login}/>
-          <Route path="/register" component={Register}/>
-          <Route path="/stock" component={StockList}/>
-          <Route path="/" component={StockList}/>
-        </Switch>
-      )
-    }
-    
-
     </FullScreen>
   );
 }

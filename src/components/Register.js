@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import Describtion from './componentsHelper/Describtion';
-import {Link, Redirect} from 'react-router-dom';
+import {Link, useHistory} from 'react-router-dom';
 import {db} from '../firebase';
 function Register() {
     const [user,setUser] = useState({
@@ -10,7 +10,11 @@ function Register() {
         email:'',
         password:''
     });
-    const [err,setErr] = useState(false);
+    const [err,setErr] = useState({
+        userExists:false,
+        isNotStrong:false
+    });
+    const history = useHistory();
     const updateUser = (e) =>{
         setUser((old)=>{
             return{
@@ -21,22 +25,40 @@ function Register() {
     }
     const createUser = async (e) =>{
         try{
-            e.preventDefault()
+            setErr({
+                userExists:false,
+                isNotStrong:false
+            });
+            e.preventDefault();
             console.log('authenticating the user');
             console.log(user);
             const userData = await db.collection('users').doc(user.username).get()
             if(userData.exists){
-                setErr(true);
+                setErr((old)=>{
+                    return{
+                        ...old,
+                        userExists:true
+                    }
+                });
             }else{
-                db.collection('users').doc(user.username).set(user)
+                if(user.password.length <8){
+                    setErr((old)=>{
+                        return{
+                            ...old,
+                            isNotStrong:true
+                        }
+                    })
+                }else{
+                    db.collection('users').doc(user.username).set(user);
+                    setUser({
+                        username:'',
+                        name:'',
+                        email:'',
+                        password:''
+                    });
+                    history.push('/login');
+                }
             }
-            setUser({
-                username:'',
-                name:'',
-                email:'',
-                password:''
-            });
-            Redirect('/login');
         }catch(err){
             console.log(err);
         }
@@ -46,7 +68,10 @@ function Register() {
             <Describtion/>
             <RegisterSection className="col-md-6 d-flex flex-column justify-content-center align-items-center" >
                 <Tittle className="h1">Register here</Tittle>
-                <RegisterPart onSubmit={createUser} className="form-group d-flex flex-column" state={err}>
+                <RegisterPart 
+                onSubmit={createUser} 
+                className="form-group d-flex flex-column" 
+                state={err.userExists} passState={err.isNotStrong}>
                     <input 
                     type="text" 
                     name="name" 
@@ -62,6 +87,8 @@ function Register() {
                     value={user.username} 
                     onChange={updateUser} 
                     required="true"/>
+                    <p className="err">username already exists</p>
+
 
                     <input 
                     type="email" 
@@ -78,7 +105,7 @@ function Register() {
                     value={user.password} 
                     onChange={updateUser} 
                     required="true"/>
-                    <p className="err">username already exists</p>
+                    <p className="passErr">atleast 8characters long</p>
 
                     <button type="submit" className="btn btn-primary">Register</button>
                 </RegisterPart>
@@ -125,16 +152,28 @@ const RegisterPart = styled.form`
         border:none;
         border-bottom:2px solid lightgray;
         color:black;
-        font-size:1.5rem;
+        font-size:1.4rem;
         margin-bottom:1rem;
         padding-bottom:.5rem;
         :focus-within{
             border-bottom:2px solid rgba(0,0,0,.5);
         }
+        :nth-child(2){
+            margin-bottom:${props =>(props.state ? 0:1)}rem;
+        }
+        :nth-child(4){
+            margin-bottom:${props =>(props.state ? 0:1)}rem;
+        }
+    }
+    p{
+        color:red;
+        font-weight:500;
     }
     .err{
         display:${props => (props.state ? "flex":"none")};
-        color:red;
+    }
+    .passErr{
+        display:${props => (props.passState ? "flex":"none")};
     }
     button{
         margin:3rem 0 1rem;
